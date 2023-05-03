@@ -10,8 +10,10 @@ class PointsData{
 
     add(x, y){
         if(this.points.length == 0)
-            this.globalPosition = new Vector2(x.toFixed(1), y.toFixed(1))
-
+            this.globalPosition = new Vector2(format(x,2), format(y,2))
+        if(this.points.length == 1)
+            this.globalRotation = format( Math.atan2(y-this.points[0].y, x-this.points[0].x) *180/Math.PI, 2 )
+        
         this.points.push(new Vector2(x, y))
         this.calculateDistancesFromPoints()
     }
@@ -23,33 +25,35 @@ class PointsData{
         // Every consecutive point will be based off of these two points,
         // so they can decide the global position and rotation of the remapped points.
         this.points[0] = this.globalPosition
-        this.points[1] = new Vector2(this.distances[0][1]+this.globalPosition.x, this.globalPosition.y)
-        this.points[1].rotate( this.globalRotation )
+        let point1 = new Vector2(this.distances[0][1], 0)
+        this.points[1] = point1.rotate(this.globalRotation).add( this.globalPosition )
         if(this.distances.length <= 2) return
 
-        // Intersections of all posible directions around a point, are the places where all distances matches all of the known references
+        // 2 Circles can create only 1 pair of intersecting points or roots. And its not enough to determine a position
         let two_referencedByZero = new Circle(this.points[0], this.distances[2][0])
         let two_referencedByOne = new Circle(this.points[1], this.distances[2][1])
         this.points[2] = two_referencedByZero.intersectWithCircle( two_referencedByOne )[mirror_root] //result might end up mirrored depending on the root used
 
-        
-        // Exact mapping 
+
         for(let n=3; n<this.distances[0].length; n++){
-            // 2 Circles can create only 1 pair of intersecting points or roots. And its not enough to determine a position
             // 3 Circles can create up to 3 combinations of pair-roots. Enough to determine a position
             let n_referencedByZero = new Circle(this.points[0], this.distances[n][0])
             let n_referencedByOne = new Circle(this.points[1], this.distances[n][1])
             let n_referencedByTwo = new Circle(this.points[2], this.distances[n][2])
 
             // Check for more intersections for more reliability or let it be the bare minimum of 2
-            rootsZeroOne = n_referencedByZero.intersectWithCircle( n_referencedByOne )
-            rootsZeroTwo = n_referencedByZero.intersectWithCircle( n_referencedByTwo )
+            let rootsZeroOne = n_referencedByZero.intersectWithCircle( n_referencedByOne )
+            let rootsZeroTwo = n_referencedByZero.intersectWithCircle( n_referencedByTwo )
 
             if( rootsZeroOne[0].equalTo(rootsZeroTwo[0]) || rootsZeroOne[0].equalTo(rootsZeroTwo[1]) ){
                 this.points[n] = rootsZeroOne[0]
             }
             else if( rootsZeroOne[1].equalTo(rootsZeroTwo[0]) || rootsZeroOne[1].equalTo(rootsZeroTwo[1]) ){
                 this.points[n] = rootsZeroOne[1]
+            }
+            else{
+                this.points[n] = rootsZeroOne[1]
+                console.log("----------Fake root: ", this.points[n])
             }
         }
     }
@@ -62,7 +66,7 @@ class PointsData{
         for(let i in this.points){
             this.distances[i] = []
             for(let j in this.points){
-            this.distances[i].push( this.points[i].distanceTo(this.points[j]) )
+            this.distances[i].push( this.points[i].to(this.points[j]).length )
             }
         }
     }
@@ -82,15 +86,22 @@ class PointsData{
 
     parseDistancesFromOutput(outStr){
         outStr = outStr.trim().split("\n")
-        if(outStr.length <= 2) return []
+        if(outStr.length <= 0) return []
 
-        // Parse global info
-        let parsedGlobalPos = outStr[0].slice(6).split(", ")
-        let parsedGlobalRot= outStr[1].slice(6)
-        this.globalPosition.x = parseFloat( parsedGlobalPos[0] )
-        this.globalPosition.y = parseFloat( parsedGlobalPos[1] )
-        this.globalRotation =parseFloat( parsedGlobalRot[1] )
-        outStr = outStr.splice(2)
+        // Parse global info, if any
+        if(outStr[0][0] === "G"){
+            if(outStr.length <= 1) return []
+            let parsedGlobalPos = outStr[0].slice(6).split(", ")
+            let parsedGlobalRot= outStr[1].slice(6)
+            this.globalPosition.x = parseFloat( parsedGlobalPos[0] )
+            this.globalPosition.y = parseFloat( parsedGlobalPos[1] )
+            this.globalRotation = parseFloat( parsedGlobalRot )
+            outStr = outStr.splice(2)
+        }
+        else{
+            this.globalPosition = new Vector2(0,0)
+            this.globalRotation = 0
+        }
 
         // How many 2D points represents 'n' distance measurements
         let size = nth_triangular_inverse(outStr.length) + 1

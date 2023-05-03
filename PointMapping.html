@@ -11,10 +11,10 @@
       <tr>
         <td class="lateral">
           <textarea id="distances_text"></textarea>
-          <br><button id="map_button">(Re)Map distances</button>
+          <br><button id="remap_button">(Re)Map distances</button>
         </td>
         <td class="main">
-          <canvas width="600px" height="400" id="canvas"></canvas>
+          <canvas id="canvas"></canvas>
         </td>
       </tr>
     </tbody>
@@ -24,23 +24,45 @@
   <script>
 
     let pointsData = new PointsData()
-    let canvasData = new CanvasData()
+    let canvasData = new CanvasData(canvas)
 
-
+    // Add point over the canvas and update text output
     canvasData.canvas.addEventListener("mousedown", (e)=>{
-      pointsData.add(e.offsetX, e.offsetY)
+      let pos = canvasData.formatOutputPoint(e.offsetX, e.offsetY)
+      pointsData.add(pos.x, pos.y)
       distances_text.value = pointsData.parseOutputFromDistances()
     })
 
-    map_button.onclick = function(){
+    // Calculates 2D points from inputed 1D distances, then redraws the canvas using those 2D points
+    remap_button.onclick = function(){
       pointsData.parseDistancesFromOutput( distances_text.value )
-      pointsData.remapPointsFromDistances()
-      console.log("Points Remapped:", pointsData.points)
+      let root = random(2)
+      pointsData.remapPointsFromDistances( root )
+      console.log("Points Remapped:", pointsData.points, ", root:",root)
 
-      for(let p in pointsData.points)
-      canvasData.canvas.drawPoint(pointsData.points[p].x, pointsData.points[p].y)
+      canvasData = new CanvasData(canvas)
+      for(let p in pointsData.points){
+        let pos = canvasData.formatInputPoint(pointsData.points[p].x, pointsData.points[p].y)
+        canvasData.drawPoint(pos.x, pos.y)
+      }
     }
 
+    /*function animateRotationAround(target, pivot, time=1000, angle=360){
+      let points = pointsData.points
+      let update = setInterval(()=>{
+        target = pivot.to(target).rotate(angle/time*10).add(pivot)
+
+        canvasData = new CanvasData(canvas)
+        canvasData.drawPoint(target.x, target.y)
+        for(let p in points){
+          canvasData.drawPoint(points[p].x, points[p].y)
+        }
+      }, 10)
+
+      setTimeout(()=>{
+        clearInterval(update)
+      }, time)
+    }*/
 
   </script>
 </html>

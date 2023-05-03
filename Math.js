@@ -12,9 +12,13 @@
 		equalTo(vector){
 			return (this.x == vector.x) &&  (this.y == vector.y)
 		}
-		
-		distanceTo(vector){
-			return (new Vector2(this.x - vector.x, this.y - vector.y)).length
+
+		to(vector){
+			return new Vector2(vector.x - this.x, vector.y - this.y)
+		}
+
+		add(vector){
+			return new Vector2(vector.x + this.x, vector.y + this.y)
 		}
 
 		rotate(angleDegrees){
@@ -23,10 +27,8 @@
 			angleRadians += Math.atan2(this.y, this.x)
 			
 			// Polar to cartesian
-			let radius = this.length
-			this.x = radius * Math.cos(angleRadians);
-			this.y = radius * Math.sin(angleRadians);
-			return this
+			let r = this.length
+			return new Vector2(r * Math.cos(angleRadians), r * Math.sin(angleRadians))
 		}
 	}
 
@@ -63,16 +65,16 @@
 			console.debug(`${A}x^2 + ${B}x + ${C}`);
 			
 
-			// Solve 'x' and Find 'y' using knwn 'x'
+			// Solve 'x' and Find 'y' using known 'x'
 			let {x1, x2} = solveQuardaticEquation(A, B ,C)
 			let y1 = y_solver(x1)
 			let y2 = y_solver(x2)
 
 			// Round because of precision errors, and the division by zero fix
-			x1 = parseFloat(x1.toFixed(3))
-			x2 = parseFloat(x2.toFixed(3))
-			y1 = parseFloat(y1.toFixed(3))
-			y2 = parseFloat(y2.toFixed(3))
+			x1 = format(x1, 3)
+			x2 = format(x2, 3)
+			y1 = format(y1, 3)
+			y2 = format(y2, 3)
 			console.debug(`Root1(${x1}, ${y1});  Root2(${x2}, ${y2})`);
 			
 			return [new Vector2(x1, y1), new Vector2(x2, y2)]
@@ -83,9 +85,9 @@
 	// x = (-b +- sqrt(b^2 - 4ac)) / 2a
 	function solveQuardaticEquation(a, b, c){
 		let dividend_left = -b
-		let dividend_right = Math.sqrt(b*b - 4*a*c)
+		let dividend_right = Math.sqrt(Math.abs(b*b - 4*a*c))
 		let divisor = 2*a
-		
+
 		let x1 = (dividend_left + dividend_right) / divisor
 		let x2 = (dividend_left - dividend_right) / divisor
 		
@@ -110,5 +112,9 @@
 	// Like factorial but with sums
 	function nth_triangular(n){
 		return ( n * ( n + 1 ) / 2 )
+	}
+
+	function format(number, toFixed){
+		return parseFloat( number.toFixed(toFixed) )
 	}
 	
