@@ -1,0 +1,46 @@
+
+<html>
+  <script type="text/javascript" src="Math.js"></script>
+  <script type="text/javascript" src="PointsData.js"></script>
+  <script type="text/javascript" src="Canvas.js"></script>
+  <link rel="stylesheet" href="Stylesheet.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <table>
+    <tbody>
+      <tr>
+        <td class="lateral">
+          <textarea id="distances_text"></textarea>
+          <br><button id="map_button">(Re)Map distances</button>
+        </td>
+        <td class="main">
+          <canvas width="600px" height="400" id="canvas"></canvas>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  </body>
+  <script>
+
+    let pointsData = new PointsData()
+    let canvasData = new CanvasData()
+
+
+    canvasData.canvas.addEventListener("mousedown", (e)=>{
+      pointsData.add(e.offsetX, e.offsetY)
+      distances_text.value = pointsData.parseOutputFromDistances()
+    })
+
+    map_button.onclick = function(){
+      pointsData.parseDistancesFromOutput( distances_text.value )
+      pointsData.remapPointsFromDistances()
+      console.log("Points Remapped:", pointsData.points)
+
+      for(let p in pointsData.points)
+      canvasData.canvas.drawPoint(pointsData.points[p].x, pointsData.points[p].y)
+    }
+
+
+  </script>
+</html>
