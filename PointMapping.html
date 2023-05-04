@@ -4,28 +4,55 @@
   <script type="text/javascript" src="PointsData.js"></script>
   <script type="text/javascript" src="Canvas.js"></script>
   <link rel="stylesheet" href="Stylesheet.css">
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-
-  <table>
-    <tbody>
-      <tr>
-        <td class="lateral">
-          <textarea id="distances_text"></textarea>
-          <br><button id="remap_button">(Re)Map distances</button>
-        </td>
-        <td class="main">
-          <canvas id="canvas"></canvas>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <body>
+    
+    <center><table>
+      <tbody>
+        <tr>
+          <td class="title" colspan="2">
+            <h1>Can a set of one-dimentional distances be mapped into a 2D grid?</h1>
+            <ol>
+              <li>
+                Click over the grid to <b>create at least 2 points</b>
+              </li>
+              <li>
+                <b>Copy</b> distances result (all of it)
+              </li>
+              <li>
+                Reload this page and <b>paste</b> distances again (to ensure no under means are happening)
+              </li>
+              <li>
+                Click <b>(Re)Map</b> and see if the distances where mapped into its original positions
+              </li>
+              <li>
+                (Result might be mirrored, in which case click (Re)Map again to fix it. <b>See why below</b>)
+              </li>
+            </ol>
+          </td>
+        </tr>
+        <tr>
+          <td class="lateral">
+            <textarea id="distances_text"></textarea>
+            <br><button id="remap_button">(Re)Map distances</button>
+          </td>
+          <td class="main">
+            <canvas id="canvas"></canvas>
+          </td>
+        </tr>
+        <tr>
+          <td class="foot" colspan="2">
+            <br><br>
+            <center><img width="600" src="https://github.com/dip000/Distance-between-points-remapper/blob/main/Assets/Esquematicos%20de%20mappeo.png?raw=true"><center>
+          </td>
+        </tr>
+      </tbody>
+    </table></center>
 
   </body>
   <script>
 
     let pointsData = new PointsData()
     let canvasData = new CanvasData(canvas)
-    let remapRoot = 0
 
 
     // Add point over the canvas and update text output
@@ -35,21 +62,32 @@
       distances_text.value = pointsData.parseOutputFromDistances()
     })
 
+
     // Calculates 2D points from inputed 1D distances, then redraws the canvas using those 2D points
+    let remapRoot = 0
     remap_button.onclick = function(){
       remapRoot^=1 // toggle different solution roots
       pointsData.parseDistancesFromOutput( distances_text.value )
       pointsData.remapPointsFromDistances( remapRoot )
       console.log("Points Remapped:", pointsData.points, ", root:",remapRoot)
 
-      canvasData.redraw(pointsData.points, canvasData.pointRadius)
+      canvasData.redraw(pointsData.points)
     }
+
 
     // Scale canvas with mouse wheel
     canvasData.canvas.addEventListener('wheel', function(e){
+      e.preventDefault()
       let scale = (e.deltaY < 0) ? Math.min(canvasData.pointRadius+1, 20) : Math.max(canvasData.pointRadius-1, 3)
       canvasData.redraw(pointsData.points, scale)
     })
+
+
+    // Resize canvas with textarea handle
+    new ResizeObserver(outputsize).observe(distances_text)
+    function outputsize() {
+      canvasData.redraw(pointsData.points, canvasData.pointRadius, distances_text.offsetHeight + 57)
+    }
 
   </script>
 </html>

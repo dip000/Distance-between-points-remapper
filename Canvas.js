@@ -5,24 +5,25 @@ class CanvasData{
     gridCellSize = new Vector2(this.pointRadius*2, this.pointRadius*2)
     points = 0
 
-    constructor(canvas, scale=10){
+    constructor(canvas, scale=10, height=400){
         // Setup
         this.canvas = canvas
         let ctx = canvas.getContext('2d')
-        this.canvas.width = 600
-        this.canvas.height= 400
-        this.redraw([], scale)
+        this.redraw([], scale, height)
 
-        // Points on click
+        // Draw points on click
         let t = this
         this.canvas.addEventListener('mousedown', function(e) {
             t.drawPoint(e.offsetX, e.offsetY)
         })
     }
 
-    redraw(points, scale=10){
+    redraw(points, scale, height){
+        if(scale) this.pointRadius = scale
+        if(height) this.canvas.height= height
+        
         let ctx = canvas.getContext("2d")
-        this.pointRadius = scale
+        this.canvas.width = 600
         this.gridCellSize = new Vector2(this.pointRadius*2, this.pointRadius*2)
         this.points = 0
 
