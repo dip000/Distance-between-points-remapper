@@ -1,16 +1,30 @@
 
 
 class CanvasData{
-    pointRadius = 15
+    pointRadius = 10
     gridCellSize = new Vector2(this.pointRadius*2, this.pointRadius*2)
     points = 0
 
-    constructor(canvas){
+    constructor(canvas, scale=10){
         // Setup
         this.canvas = canvas
         let ctx = canvas.getContext('2d')
         this.canvas.width = 600
         this.canvas.height= 400
+        this.redraw([], scale)
+
+        // Points on click
+        let t = this
+        this.canvas.addEventListener('mousedown', function(e) {
+            t.drawPoint(e.offsetX, e.offsetY)
+        })
+    }
+
+    redraw(points, scale=10){
+        let ctx = canvas.getContext("2d")
+        this.pointRadius = scale
+        this.gridCellSize = new Vector2(this.pointRadius*2, this.pointRadius*2)
+        this.points = 0
 
         // Background
         ctx.fillStyle = "#EEEEEE"
@@ -21,16 +35,16 @@ class CanvasData{
             let col = x*this.gridCellSize.x
             this.drawLine(col, 0, col, canvas.height)
         }
-        for(let y=0; y<canvas.width/this.gridCellSize.y; y++){
+        for(let y=canvas.height/this.gridCellSize.y-1; y>=0; y--){
             let row = y*this.gridCellSize.y
             this.drawLine(0, row, canvas.width, row)
         }
         
-        // Points on click
-        let t = this
-        this.canvas.addEventListener('mousedown', function(e) {
-            t.drawPoint(e.offsetX, e.offsetY)
-        })
+        // Points
+        for(let p in points){
+            let pos = this.formatInputPoint(points[p].x, points[p].y)
+            this.drawPoint(pos.x, pos.y)
+        }
     }
 
     drawPoint(x, y){

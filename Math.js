@@ -9,8 +9,8 @@
 			return Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2))
 		}
 
-		equalTo(vector){
-			return (this.x == vector.x) &&  (this.y == vector.y)
+		equals(vector, epsilon=0.02){
+			return (Math.abs(this.x - vector.x) < epsilon) &&  (Math.abs(this.y - vector.y) < epsilon)
 		}
 
 		to(vector){
@@ -70,11 +70,11 @@
 			let y1 = y_solver(x1)
 			let y2 = y_solver(x2)
 
-			// Round because of precision errors, and the division by zero fix
-			x1 = format(x1, 3)
-			x2 = format(x2, 3)
-			y1 = format(y1, 3)
-			y2 = format(y2, 3)
+			//[WARNING] This (and divission by zero fix) might end up accumulating enough presision errors to be relevant
+			x1 = format(x1, 5)
+			x2 = format(x2, 5)
+			y1 = format(y1, 5)
+			y2 = format(y2, 5)
 			console.debug(`Root1(${x1}, ${y1});  Root2(${x2}, ${y2})`);
 			
 			return [new Vector2(x1, y1), new Vector2(x2, y2)]

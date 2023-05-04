@@ -25,6 +25,8 @@
 
     let pointsData = new PointsData()
     let canvasData = new CanvasData(canvas)
+    let remapRoot = 0
+
 
     // Add point over the canvas and update text output
     canvasData.canvas.addEventListener("mousedown", (e)=>{
@@ -35,34 +37,19 @@
 
     // Calculates 2D points from inputed 1D distances, then redraws the canvas using those 2D points
     remap_button.onclick = function(){
+      remapRoot^=1 // toggle different solution roots
       pointsData.parseDistancesFromOutput( distances_text.value )
-      let root = random(2)
-      pointsData.remapPointsFromDistances( root )
-      console.log("Points Remapped:", pointsData.points, ", root:",root)
+      pointsData.remapPointsFromDistances( remapRoot )
+      console.log("Points Remapped:", pointsData.points, ", root:",remapRoot)
 
-      canvasData = new CanvasData(canvas)
-      for(let p in pointsData.points){
-        let pos = canvasData.formatInputPoint(pointsData.points[p].x, pointsData.points[p].y)
-        canvasData.drawPoint(pos.x, pos.y)
-      }
+      canvasData.redraw(pointsData.points, canvasData.pointRadius)
     }
 
-    /*function animateRotationAround(target, pivot, time=1000, angle=360){
-      let points = pointsData.points
-      let update = setInterval(()=>{
-        target = pivot.to(target).rotate(angle/time*10).add(pivot)
-
-        canvasData = new CanvasData(canvas)
-        canvasData.drawPoint(target.x, target.y)
-        for(let p in points){
-          canvasData.drawPoint(points[p].x, points[p].y)
-        }
-      }, 10)
-
-      setTimeout(()=>{
-        clearInterval(update)
-      }, time)
-    }*/
+    // Scale canvas with mouse wheel
+    canvasData.canvas.addEventListener('wheel', function(e){
+      let scale = (e.deltaY < 0) ? Math.min(canvasData.pointRadius+1, 20) : Math.max(canvasData.pointRadius-1, 3)
+      canvasData.redraw(pointsData.points, scale)
+    })
 
   </script>
 </html>

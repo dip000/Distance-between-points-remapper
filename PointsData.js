@@ -37,23 +37,27 @@ class PointsData{
 
         for(let n=3; n<this.distances[0].length; n++){
             // 3 Circles can create up to 3 combinations of pair-roots. Enough to determine a position
+            // [WARNING] 'this.distances' might not be a complete data set, in which case, it should check for nulls and use another reference
             let n_referencedByZero = new Circle(this.points[0], this.distances[n][0])
             let n_referencedByOne = new Circle(this.points[1], this.distances[n][1])
             let n_referencedByTwo = new Circle(this.points[2], this.distances[n][2])
 
-            // Check for more intersections for more reliability or let it be the bare minimum of 2
+            // N circles can create up to 'nth_triangular(N)' intersections
+            // [TODO] Check for more intersections for more reliability
             let rootsZeroOne = n_referencedByZero.intersectWithCircle( n_referencedByOne )
             let rootsZeroTwo = n_referencedByZero.intersectWithCircle( n_referencedByTwo )
 
-            if( rootsZeroOne[0].equalTo(rootsZeroTwo[0]) || rootsZeroOne[0].equalTo(rootsZeroTwo[1]) ){
+            // Solution is the common root among intersections
+            if( rootsZeroOne[0].equals(rootsZeroTwo[0]) || rootsZeroOne[0].equals(rootsZeroTwo[1]) ){
                 this.points[n] = rootsZeroOne[0]
             }
-            else if( rootsZeroOne[1].equalTo(rootsZeroTwo[0]) || rootsZeroOne[1].equalTo(rootsZeroTwo[1]) ){
+            else if( rootsZeroOne[1].equals(rootsZeroTwo[0]) || rootsZeroOne[1].equals(rootsZeroTwo[1]) ){
                 this.points[n] = rootsZeroOne[1]
             }
             else{
+                //[TODO] Check if this ever happens. If it does, blame Circle.intersectWithCircle() precision shenanigans
                 this.points[n] = rootsZeroOne[1]
-                console.log("----------Fake root: ", this.points[n])
+                console.log("----------FAKE ROOT. \nrootsZeroOne:", rootsZeroOne, "\nrootsZeroTwo: ",rootsZeroTwo)
             }
         }
     }
